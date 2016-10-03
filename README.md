@@ -1,2 +1,10 @@
 # yanphp-cms
-yanphp content manage system,base on yii2 framework
+yanphp-cms 是一款响应式，模块化内容管理系统，它可以帮助你快速的开发网站，
+基于yii2高速框架，后台同样采用响应式布局，支持中英文切换。
+
+<h3>特色</h3>
+<ul>
+<li>响应式开发</li>
+<li>模块化开发</li>
+<li>标签调用</li>
+</ul>
