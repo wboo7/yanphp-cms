@@ -8,3 +8,8 @@ yanphp-cms 是一款响应式，模块化内容管理系统，它可以帮助你
 <li>模块化开发</li>
 <li>标签调用</li>
 </ul>
+
+<h3>安装</h3>
+1.git clone https://github.com/wboo7/yanphp-cms.git <目录名>
+2.执行“域名/initdata/index.php”，初始化数据
+3.执行“域名/index.php/install”,安装
