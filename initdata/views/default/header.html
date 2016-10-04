@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="keywords" content="{$keywords}">
+    <meta name="description" content="{$description}">
+    <meta name="author" content="YANPHP">
+
+    <title>{$title}</title>
+
+
+    <link href="{__ROOT__}statics/common/css/bootstrap.css" rel="stylesheet">
+    <link href="{__ROOT__}statics/common/css/animate.css" rel="stylesheet">
+    <link href="{__ROOT__}statics/common/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
+    <script src="{__ROOT__}statics/common/js/jquery.js"></script>
+    <script src="{__ROOT__}statics/common/js/bootstrap.js"></script>
+    <script src="{__ROOT__}statics/common/js/require.js"></script>
+
+    <script>requirejs.config({
+        baseUrl:'{__ROOT__}statics/',
+        paths:{
+            "jquery":"common/js/jquery"
+        },
+        map: {
+            '*': {
+                'css': 'common/js/require-css'
+            }
+        }
+
+    });</script>
+
+    <!--[if lt IE 9]>
+    <script src="{__ROOT__}statics/common/js/html5shiv.min.js"></script>
+    <script src="{__ROOT__}statics/common/js/respond.min.js"></script>
+    <![endif]-->
+
+
+    
+    
+    <!-- manager start --><!-- manager end -->
+
+
+
+</head>
+<body>
+<nav class="nav1473135388">
+    <div class="yan-nav-bar demo-nav">
+        <div class="container clearfix">
+            <a class="yan-nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </a>
+            <div class="yan-logo">
+                <img src="{__ROOT__}statics/content/images/logo.png">
+            </div>
+            <div class="yan-nav">
+                <div class="search-group">
+                    <form action="{url:search}" method="get">
+                        <input type="text" name="title" placeholder="关键词输入2">
+                        <button>
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                    </form>
+
+                </div>
+                <ul>
+                    <li>
+                        <a href="{url:index}">Home</a>
+                    </li>
+                    {yan:content action="category" pid="0" ismenu="1"}
+                    {loop $data['lists'] $sub}
+                    {if $sub['children']}
+                    <li>
+                        <a href="javascript:;">{$sub['catname']}</a>
+                        <ul class="yan-drop-down">
+                            {loop  $sub['children'] $sub2}
+                            {if $sub2['children']}
+
+                            <li>
+                                <a href="javascript:;">{$sub2['catname']}</a>
+                                <ul class="yan-drop-down">
+                                    {loop $sub2['children'] $sub3}
+                                    <li><a href="{$sub3['url']}">{$sub3['catname']}</a></li>
+                                    {/loop}
+                                </ul>
+                            </li>
+                            {else}
+                            <li><a href="{$sub2['url']}">{$sub2['catname']}</a></li>
+                            {/if}
+                            {/loop}
+                        </ul>
+                    </li>
+
+                    {else}
+                    <li>
+                        <a href="{$sub['url']}">{$sub['catname']}</a>
+                    </li>
+                    {/if}
+                    {/loop}
+                    {/yan}
+
+                </ul>
+
+            </div>
+        </div>
+
+
+
+    </div>
+
+</nav>
+
