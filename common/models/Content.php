@@ -447,7 +447,7 @@ class Content extends ActiveRecord
                     if ($v2['parentid'] == $datas['pid'])
                         $lists[] = $v2;
                 } else {
-                    if ($v2['id'] == $datas['pid'])
+                    if ($v2['parentid'] == $datas['pid'])
                         $lists[] = $v2;
                 }
 
