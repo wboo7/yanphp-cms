@@ -37,7 +37,12 @@ class Template extends ViewRenderer
         $this->parser = Yii::createObject([
             'class'=>'frontend\extensions\Parser'
         ]);
-        $this->compile_dir = $this->app->controller->module->runtime.'/compiles/';
+        $compilesPath = Yii::getAlias('@webroot/frontend/runtime/compiles/');
+        if(!is_dir($compilesPath))
+        {
+            File::createDirectory($compilesPath);
+        }
+        $this->compile_dir = $compilesPath;
 
     }
     public function render($view, $file, $params)
