@@ -195,22 +195,13 @@ class Content extends ActiveRecord
     //.标签调用 列表
     public function lists($datas)
     {
-
         if (!isset($datas['catid'])) {
             return [];
         }
-        $catid = $datas['catid'];
-        $catid = preg_replace('~，~', ',', $catid);
+        $ids = CategoryContent::getCatIds($datas['catid']);
         $query = self::find();
         $order = isset($datas['order']) ? $datas['order'] : 'id DESC';
-
-
-        $item = explode(',', $catid);
-        if ($item) {
-            $query->andWhere(['in', 'catid', $item]);
-        } else {
-            $query->andWhere(['catid' => $catid]);
-        }
+        $query->andWhere(['in', 'catid', $ids]);
 
         $totalCount = $query->count();
         $pages = new Pagination([
@@ -249,6 +240,7 @@ class Content extends ActiveRecord
             'pages' => $this->formatPageStr($pages,$datas)
         ];
     }
+
 
     //.标签调用 幻灯轮播
     public function banner($params)
@@ -434,6 +426,7 @@ class Content extends ActiveRecord
         $lists = [];
 
         if (strpos($datas['pid'], ',') !== false) {
+
             $pids = explode(',', $datas['pid']);
             foreach ($pids as $v) {
                 foreach ($result as $v2) {
@@ -442,6 +435,7 @@ class Content extends ActiveRecord
                 }
             }
         } else {
+
             foreach ($result as $v2) {
                 if ($datas['pid'] == 0) {
                     if ($v2['parentid'] == $datas['pid'])

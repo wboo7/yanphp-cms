@@ -262,5 +262,40 @@ class CategoryContent extends ActiveRecord
 
     }
 
+    /*
+   * 获取分类id及所有子分类id
+   * */
+    public static function getCatIds($str)
+    {
+        $str = str_replace('，',',',$str);
+        $result = [];
+        $category = CategoryContent::getConstruct();
+
+        $arr = explode(',',$str);
+
+        foreach($arr as $v)
+        {
+            $result[] = $v;
+            if(isset($category[$v]['children']) && $category[$v]['children'])
+            {
+                foreach($category[$v]['children'] as $v2)
+                {
+                    $result [] = $v2['id'];
+                    if(isset($v2['children']) && $v2['children'])
+                    {
+                        foreach($v2['children'] as $v3)
+                        {
+                            $result[] = $v3['id'];
+                        }
+                    }
+                }
+            }
+
+
+        }
+        return $result;
+
+    }
+
 
 }
