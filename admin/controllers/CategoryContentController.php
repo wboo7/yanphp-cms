@@ -24,7 +24,7 @@ class CategoryContentController extends BackendController
     //栏目列表
     public function actionIndex()
     {
-        $lists = CategoryContent::getAll();
+        $lists = CategoryContent::getConstruct();
 
         $tree = new tree();
         $tree->icon = array('&nbsp;&nbsp;&nbsp;│ ', '&nbsp;&nbsp;&nbsp;├─ ', '&nbsp;&nbsp;&nbsp;└─ ');
@@ -34,15 +34,11 @@ class CategoryContentController extends BackendController
         $format = [];
 
         foreach ($lists as $r) {
-            //$r['total'] = $this->getTotal($r['id'],$r['modelid']);
-            $r['total'] = 0;
             $r['modelname'] = isset($r['model']['name']) ? $r['model']['name'] : '单页';
             $r['str_manage'] = '';
-
             $r['str_manage'] .= Html::a('', Url::to(['category-content/create', 'parentid' => $r['id']]), ['class' => 'fa fa-plus', 'title' => '添加子栏目']) . ' ';
             $r['str_manage'] .= Html::a('', Url::to(['category-content/create', 'id' => $r['id']]), ['class' => 'fa fa-pencil', 'title' => '修改']) . ' ';
             $r['str_manage'] .= '<a data-confirm-title="提示" data-confirm-message="确定删除吗？此操作会删除所有子栏目和对应的文章！" role="modal-remote" class="fa fa-trash" data-url="'.Url::to(['category-content/delete', 'id' => $r['id']]).'">';
-
             $format[$r['id']] = $r;
         }
         $tree->init($format);

@@ -1,5 +1,6 @@
 <?php
 namespace common\libs;
+
 use common\models\Model;
 use yii\helpers\Url;
 use yii\helpers\Html;
@@ -35,6 +36,7 @@ class tree
         return is_array($arr);
     }
 
+    /* 树形菜单显示 最大支持三级分类 */
     public function get_tree()
     {
         $category = $this->arr;
@@ -47,20 +49,38 @@ class tree
         $str = '<ul id="browser" class="filetree">';
 
         foreach ($top as $v) {
-            if (!empty($v['sub'])) {
-                $str .= '<li><span class="folder" title="catid:'.$v['id'].'">' . $v['catname'] . '</span>';
-                $len = count($v['sub']);
+            $children = $v['children'];
+            if (!empty($children)) {
+                $str .= '<li><span class="folder">' . $v['catname'] . '</span>';
+                $len = count($children);
                 $str .= '<ul>';
                 for ($i = 0; $i < $len; $i++) {
-                    $a = $v['sub'][$i]['model']['type'] == Model::TYPE_CUSTOM ? 'add' : 'file';
-                    $b = 'id="' . $v['sub'][$i]['id'] . '"';
-                    $ispage = $v['model']['type'] == Model::TYPE_PAGE ? 'ispage="true"' : '';
-                    $str .= '<li '.$ispage.' '. $b . '><span class="' . $a . '" title="catid:'.$v['sub'][$i]['id'].'">' . '<a href="?r=content/index&catid='.$v['sub'][$i]['id'].'" class="pjax-link">'.$v['sub'][$i]['catname'] . '</a></span></li>';
+                    $a = $children[$i]['model']['type'] == Model::TYPE_CUSTOM ? 'add' : 'file';
+                    //.三级目录处理
+
+                    if (isset($children[$i]['children']) && $children[$i]['children']) {
+                        $sub = $children[$i]['children'];
+                        $sub_len = count($sub);
+                        $str .= '<li><span class="folder">' . $v['catname'] . '</span>';
+                        $str .= '<ul>';
+                        for ($i = 0; $i < $sub_len; $i++) {
+                            $d = $sub[$i]['model']['type'] == Model::TYPE_CUSTOM?'add':'file';
+                            $str .= '<li><span class="'.$d.'"><a href="?r=content/index&catid='.$sub[$i]['id'].'">'.$sub[$i]['catname'].'</a></span></li>';
+                        }
+                        $str .= '</ul>';
+
+                        $str .= '</li>';
+                    } else {
+                        $str .= '<li><span class="' . $a . '"><a href="?r=content/index&catid=' . $children[$i]['id'] . '">' . $children[$i]['catname'] . '</a></span></li>';
+
+                    }
+
                 }
                 $str .= '</ul>';
 
             } else {
-                $str .= '<li id="' . $v['id'] . '"><span class="add" title="catid:'.$v['id'].'">' .'<a href="?r=content/index&catid='.$v['id'].'">'. $v['catname'] . '</a></span>';
+                $c = $v['model']['type'] == Model::TYPE_CUSTOM ? 'add' : 'file';
+                $str .= '<li><span class="'.$c.'"><a href="?r=content/index&catid='.$v['id'].'">'.$v['catname'].'</a></span>';
             }
             $str .= '</li>';
         }
@@ -73,47 +93,45 @@ class tree
     /*
      * 先初始化字段，再格式化层级显示
      * */
-    public function get_tree_lists($parentid = 0,$adds='')
+    public function get_tree_lists($parentid = 0, $adds = '')
     {
 
         $categorys = $this->arr;
         $childs = $this->get_child($parentid);
         /* 格式化 */
 
-        if(!empty($childs))
-        {
+        if (!empty($childs)) {
             $num = 1;
             $total = count($childs);
-            foreach($childs as $k=>$v)
-            {
+            foreach ($childs as $k => $v) {
 
-                $j=$k='';
-                if($num==$total){
+                $j = $k = '';
+                if ($num == $total) {
                     $j .= $this->icon[2];
-                }else{
+                } else {
                     $j .= $this->icon[1];
                     $k = $adds ? $this->icon[0] : '';
                 }
                 $parentid == 0 && $spacer = '';
-                $spacer = $adds ? $adds.$j:'';
+                $spacer = $adds ? $adds . $j : '';
 
 
                 $str = '<tr>';
-                $str .= '<td align="center"><a href="'.Url::to(['category-content/sort','id'=>$v['id'],'act'=>'down']).'" class=" fa fa-long-arrow-down"></a> <a href="'.Url::to(['category-content/sort','id'=>$v['id'],'act'=>'up']).'" class=" fa fa-long-arrow-up"></a></td>';
+                $str .= '<td align="center"><a href="' . Url::to(['category-content/sort', 'id' => $v['id'], 'act' => 'down']) . '" class=" fa fa-long-arrow-down"></a> <a href="' . Url::to(['category-content/sort', 'id' => $v['id'], 'act' => 'up']) . '" class=" fa fa-long-arrow-up"></a></td>';
                 // $str .= '<td align="center">'.$v['listorder'].'</td>';
-                $str .= '<td align="center">'.$v['id'].'</td>';
-                $str .= '<td>'.$spacer.$v['catname'].'</td>';
-                $str .= '<td align="center">'.$v['modelname'].'</td>';
-                $str .= '<td align="center">'.($v['model']['list_template']?$v['model']['list_template']:'--').'</td>';
-                $str .= '<td align="center">'.($v['model']['show_template']?$v['model']['show_template']:'--').'</td>';
-                $str .= '<td align="center">'.($v['ismenu']? '是' : '否').'</td>';
+                $str .= '<td align="center">' . $v['id'] . '</td>';
+                $str .= '<td>' . $spacer . $v['catname'] . '</td>';
+                $str .= '<td align="center">' . $v['modelname'] . '</td>';
+                $str .= '<td align="center">' . ($v['model']['list_template'] ? $v['model']['list_template'] : '--') . '</td>';
+                $str .= '<td align="center">' . ($v['model']['show_template'] ? $v['model']['show_template'] : '--') . '</td>';
+                $str .= '<td align="center">' . ($v['ismenu'] ? '是' : '否') . '</td>';
 
-                $str .= '<td align="center">'.$v['str_manage'].'</td>';
+                $str .= '<td align="center">' . $v['str_manage'] . '</td>';
                 $str .= '</tr>';
 
                 $this->ret .= $str;
-                $this->get_tree_lists($v['id'],$adds.$this->nbsp);
-                $num ++;
+                $this->get_tree_lists($v['id'], $adds . $this->nbsp);
+                $num++;
             }
 
         }
@@ -143,7 +161,7 @@ class tree
      * $parentid 父id
      * $sid 当前id
      * */
-    public function get_tree_simple($parentid=0,$adds='')
+    public function get_tree_simple($parentid = 0, $adds = '')
     {
         $this->nbsp = '  ';
         static $ret;
@@ -151,25 +169,23 @@ class tree
         $childs = $this->get_child($parentid);
         /* 格式化 */
 
-        if(!empty($childs))
-        {
+        if (!empty($childs)) {
             $num = 1;
             $total = count($childs);
-            foreach($childs as $k=>$v)
-            {
-                $j=$k='';
-                if($num==$total){
+            foreach ($childs as $k => $v) {
+                $j = $k = '';
+                if ($num == $total) {
                     $j .= $this->icon[2];
-                }else{
+                } else {
                     $j .= $this->icon[1];
                 }
                 $parentid == 0 && $spacer = '';
-                $spacer = $adds ? $adds.$j:'';
-                $v['format_name'] = $spacer.$v['catname'];
+                $spacer = $adds ? $adds . $j : '';
+                $v['format_name'] = $spacer . $v['catname'];
 
                 $ret[] = $v;
-                $this->get_tree_simple($v['id'],$adds.$this->nbsp);
-                $num ++;
+                $this->get_tree_simple($v['id'], $adds . $this->nbsp);
+                $num++;
             }
         }
         return $ret;

@@ -6,7 +6,7 @@ use common\models\CategoryContent;
 use common\libs\Tree;
 class Category extends \yii\bootstrap\Widget
 {
-   public $container;
+    public $container;
 
     public function init()
     {
