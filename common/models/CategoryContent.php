@@ -28,8 +28,8 @@ class CategoryContent extends ActiveRecord
     {
         return [
             [['catname', 'modelid', 'parentid', 'ismenu'], 'required'],
-            ['content','string'],
-            [['modelid','listorder','ismenu','parentid'],'integer']
+            ['content', 'string'],
+            [['modelid', 'listorder', 'ismenu', 'parentid'], 'integer']
 
         ];
     }
@@ -37,15 +37,15 @@ class CategoryContent extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'modelid' => Yii::t('app','Model Name'),
-            'parentid' => Yii::t('app','Parent Category'),
-            'catname' => Yii::t('app','Category Name'),
-            'content'=>Yii::t('app','Content'),
-            'ismenu' => Yii::t('app','Show In Nav'),
-            'list_template' => Yii::t('app','Category List Template'),
-            'show_template' => Yii::t('app','Category Show Template'),
-            'keywords' => Yii::t('app','Category Keyword'),
-            'description' => Yii::t('app','Category Description'),
+            'modelid' => Yii::t('app', 'Model Name'),
+            'parentid' => Yii::t('app', 'Parent Category'),
+            'catname' => Yii::t('app', 'Category Name'),
+            'content' => Yii::t('app', 'Content'),
+            'ismenu' => Yii::t('app', 'Show In Nav'),
+            'list_template' => Yii::t('app', 'Category List Template'),
+            'show_template' => Yii::t('app', 'Category Show Template'),
+            'keywords' => Yii::t('app', 'Category Keyword'),
+            'description' => Yii::t('app', 'Category Description'),
 
         ];
     }
@@ -64,8 +64,6 @@ class CategoryContent extends ActiveRecord
     {
         return $this->hasOne(Model::className(), ['id' => 'modelid']);
     }
-
-
 
 
     public function getChildren()
@@ -100,10 +98,11 @@ class CategoryContent extends ActiveRecord
         return $category;
 
     }
+
     public function getContents()
     {
 
-        return $this->hasMany(Content::className(),['catid'=>'id']);
+        return $this->hasMany(Content::className(), ['catid' => 'id']);
     }
 
     /*
@@ -123,17 +122,20 @@ class CategoryContent extends ActiveRecord
     }
 
 
-
     public static function getAllCategory()
     {
-        if(self::$categorys === null)
-        {
+        if (self::$categorys === null) {
             $categorys = self::find()
                 ->asArray()
                 ->with('model')
                 ->indexBy('id')
                 ->orderBy('listorder ASC,id DESC')
                 ->all();
+            if ($categorys) {
+                foreach ($categorys as $k => $v) {
+                    $categorys[$k]['url'] = Url::to([$v['model']['type'] == Model::TYPE_PAGE ? 'page' : 'lists', 'catid' => $v['id']]);
+                }
+            }
             self::$categorys = $categorys;
         }
         return self::$categorys;
@@ -141,59 +143,60 @@ class CategoryContent extends ActiveRecord
 
     }
 
-    public static function findChild(&$arr,$id,$ismenu){
-
-        $childs=array();
-        foreach ($arr as $k => $v){
-
-            if($v['parentid']== $id){
-                $v['url'] = Url::to([$v['model']['type'] == Model::TYPE_PAGE ? 'page':'lists','catid'=>$v['id']]);
-                if($ismenu)
-                {
-                    if($v['ismenu'])
-                        $childs[]=$v;
-                }
-                else
-                {
-                    $childs[]=$v;
-                }
-
-            }
-        }
-        return $childs;
-
-    }
-    public static function buildTree($root_id,$ismenu=false){
-        $rows = self::getAllCategory();
-        $childs= self::findChild($rows,$root_id,$ismenu);
-        if(empty($childs)){
-            return null;
-        }
-        foreach ($childs as $k => $v){
-            $childs[$k]['url'] = Url::to([$v['model']['type'] == Model::TYPE_PAGE ? 'page':'lists','catid'=>$v['id']]);
-            $rescurTree=self::buildTree($v['id']);
-            if( null !=   $rescurTree){
-                $childs[$k]['children']=$rescurTree;
-            }
-        }
-        return $childs;
-    }
-    public static function buildParent(&$info,$categorys,&$origon)
+    public static function findChild(&$arr, $id, $ismenu)
     {
 
-        if($info['parentid'] == 0 || !isset($categorys[$info['parentid']]))
-        {
+        $childs = array();
+        foreach ($arr as $k => $v) {
+
+            if ($v['parentid'] == $id) {
+                $v['url'] = Url::to([$v['model']['type'] == Model::TYPE_PAGE ? 'page' : 'lists', 'catid' => $v['id']]);
+                if ($ismenu) {
+                    if ($v['ismenu'])
+                        $childs[] = $v;
+                } else {
+                    $childs[] = $v;
+                }
+
+            }
+        }
+        return $childs;
+
+    }
+
+    public static function buildTree($root_id, $ismenu = false)
+    {
+        $rows = self::getAllCategory();
+        $childs = self::findChild($rows, $root_id, $ismenu);
+        if (empty($childs)) {
+            return null;
+        }
+        foreach ($childs as $k => $v) {
+            $childs[$k]['url'] = Url::to([$v['model']['type'] == Model::TYPE_PAGE ? 'page' : 'lists', 'catid' => $v['id']]);
+            $rescurTree = self::buildTree($v['id']);
+            if (null != $rescurTree) {
+                $childs[$k]['children'] = $rescurTree;
+            }
+        }
+        return $childs;
+    }
+
+    public static function buildParent(&$info, $categorys, &$origon)
+    {
+
+        if ($info['parentid'] == 0 || !isset($categorys[$info['parentid']])) {
             return;
         }
         $info['parent'] = $categorys[$info['parentid']];
-        $info['parent']['url'] = Url::to([$info['parent']['model']['type'] == Model::TYPE_PAGE ? 'page':'lists','catid'=>$info['parent']['id']]);
+        $info['parent']['url'] = Url::to([$info['parent']['model']['type'] == Model::TYPE_PAGE ? 'page' : 'lists', 'catid' => $info['parent']['id']]);
 
-        $origon['parents'] = isset($origon['parents'])?$origon['parents']: [];
-        array_unshift($origon['parents'],$categorys[$info['parentid']]);
+        $origon['parents'] = isset($origon['parents']) ? $origon['parents'] : [];
+        array_unshift($origon['parents'], $categorys[$info['parentid']]);
         //  $origon['parents'][] = $categorys[$info['parentid']];
-        self::buildParent($info['parent'],$categorys,$origon);
+        self::buildParent($info['parent'], $categorys, $origon);
 
     }
+
     /*
      * @获取分类的信息
      * */
@@ -213,15 +216,15 @@ class CategoryContent extends ActiveRecord
         $cache = Yii::$app->cache;
         $data = $cache->get($key);
 
-        if($data === false)
-        {
+        if ($data === false) {
+
             $rows = self::getAllCategory();
             $data = [];
-            foreach($rows as $k=>$v)
-            {
-                $data[$k] = self::relation($v,$rows);
+            foreach ($rows as $k => $v) {
+
+                $data[$k] = self::relation($v, $rows);
             }
-            $cache->set($key,$data);
+            $cache->set($key, $data);
         }
         return $data;
     }
@@ -231,13 +234,13 @@ class CategoryContent extends ActiveRecord
         Bridge::setCatchPath();
         Yii::$app->cache->delete(self::cacheKey);
     }
+
     public static function relation($data)
     {
-        $data['url'] = Url::to([$data['model']['type'] == Model::TYPE_PAGE ? 'page':'lists','catid'=>$data['id']]);
         $rows = self::getAllCategory();
         $children = self::buildTree($data['id']);
         $data['children'] = $children;
-        self::buildParent($data,$rows,$data);
+        self::buildParent($data, $rows, $data);
         return $data;
     }
 
@@ -267,24 +270,19 @@ class CategoryContent extends ActiveRecord
    * */
     public static function getCatIds($str)
     {
-        $str = str_replace('，',',',$str);
+        $str = str_replace('，', ',', $str);
         $result = [];
         $category = CategoryContent::getConstruct();
 
-        $arr = explode(',',$str);
+        $arr = explode(',', $str);
 
-        foreach($arr as $v)
-        {
+        foreach ($arr as $v) {
             $result[] = $v;
-            if(isset($category[$v]['children']) && $category[$v]['children'])
-            {
-                foreach($category[$v]['children'] as $v2)
-                {
+            if (isset($category[$v]['children']) && $category[$v]['children']) {
+                foreach ($category[$v]['children'] as $v2) {
                     $result [] = $v2['id'];
-                    if(isset($v2['children']) && $v2['children'])
-                    {
-                        foreach($v2['children'] as $v3)
-                        {
+                    if (isset($v2['children']) && $v2['children']) {
+                        foreach ($v2['children'] as $v3) {
                             $result[] = $v3['id'];
                         }
                     }
