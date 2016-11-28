@@ -10,6 +10,10 @@ class Bridge
 
         return Yii::getAlias('@webroot/');
     }
+    public static function getViewPath()
+    {
+       return Yii::getAlias('@webroot/').'frontend/modules/content/views/';
+    }
 
     public static function getRootUrl()
     {
@@ -32,6 +36,18 @@ class Bridge
     {
 
         return Yii::getAlias('@webroot/admin/config/main.php');
+    }
+    public static function createTpl($file)
+    {
+
+        touch($file);
+        $str = <<<EOF
+{template 'header.html'}
+{template 'footer.html'}
+
+EOF;
+        file_put_contents($file,$str);
+
     }
 
 }

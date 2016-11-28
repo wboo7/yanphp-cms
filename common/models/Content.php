@@ -416,6 +416,7 @@ class Content extends ActiveRecord
 
         $result = CategoryContent::getConstruct();
 
+
         foreach ($result as $k => $v) {
             if ($ismenu && !$v['ismenu']) {
                 unset($result[$k]);

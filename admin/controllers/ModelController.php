@@ -53,8 +53,7 @@ class ModelController extends BackendController
             if($model->validate())
             {
                 //验证通过就要创建对应的文件
-                $rootPath = Bridge::getRootPath();
-                $viewPath = $rootPath.'views/default/';
+                $viewPath = Bridge::getViewPath().'default/';
 
 
                 if($model->list_template && !file_exists($viewPath.$model->list_template.'.html'))

@@ -131,11 +131,13 @@ class CategoryContent extends ActiveRecord
                 ->indexBy('id')
                 ->orderBy('listorder ASC,id DESC')
                 ->all();
+
             if ($categorys) {
                 foreach ($categorys as $k => $v) {
-                    $categorys[$k]['url'] = Url::to([$v['model']['type'] == Model::TYPE_PAGE ? 'page' : 'lists', 'catid' => $v['id']]);
+                    $categorys[$k]['url'] = Yii::getAlias('@web/index.php/').($v['model']['type'] == Model::TYPE_PAGE?'page/':'lists/').$v['id'];
                 }
             }
+
             self::$categorys = $categorys;
         }
         return self::$categorys;
@@ -150,7 +152,6 @@ class CategoryContent extends ActiveRecord
         foreach ($arr as $k => $v) {
 
             if ($v['parentid'] == $id) {
-                $v['url'] = Url::to([$v['model']['type'] == Model::TYPE_PAGE ? 'page' : 'lists', 'catid' => $v['id']]);
                 if ($ismenu) {
                     if ($v['ismenu'])
                         $childs[] = $v;
@@ -172,7 +173,6 @@ class CategoryContent extends ActiveRecord
             return null;
         }
         foreach ($childs as $k => $v) {
-            $childs[$k]['url'] = Url::to([$v['model']['type'] == Model::TYPE_PAGE ? 'page' : 'lists', 'catid' => $v['id']]);
             $rescurTree = self::buildTree($v['id']);
             if (null != $rescurTree) {
                 $childs[$k]['children'] = $rescurTree;
@@ -188,7 +188,6 @@ class CategoryContent extends ActiveRecord
             return;
         }
         $info['parent'] = $categorys[$info['parentid']];
-        $info['parent']['url'] = Url::to([$info['parent']['model']['type'] == Model::TYPE_PAGE ? 'page' : 'lists', 'catid' => $info['parent']['id']]);
 
         $origon['parents'] = isset($origon['parents']) ? $origon['parents'] : [];
         array_unshift($origon['parents'], $categorys[$info['parentid']]);
@@ -208,7 +207,7 @@ class CategoryContent extends ActiveRecord
         return $construct[$catid];
     }
 
-    //获取所有栏目的结构,具有缓存效果
+    //获取所有栏目的结构,具有缓存效果,此方法及子方法不能出现Url函数
     public static function getConstruct()
     {
         Bridge::setCatchPath();
@@ -231,6 +230,7 @@ class CategoryContent extends ActiveRecord
 
     public static function clearCache()
     {
+
         Bridge::setCatchPath();
         Yii::$app->cache->delete(self::cacheKey);
     }
