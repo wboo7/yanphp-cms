@@ -49,6 +49,11 @@ EOF;
         file_put_contents($file,$str);
 
     }
+    public static function contentButton($catid)
+    {
+        $str = '<a href="?r=content/collect-data&catid='.$catid.'" class="btn btn-warning""><i class="fa fa-database"> '.Yii::t('app','Collect Data').'</i></a>';
+        return $str;
+    }
 
 }
 
