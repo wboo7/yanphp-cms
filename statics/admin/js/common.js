@@ -103,24 +103,24 @@
 
 
     //日期选择器
-    var dateInput = $("input.Y_date")
-    if (dateInput.length) {
-        Yan.css('datetimepicker');
-        Yan.use('datetimepicker', 'datetimepickerzhcn',function () {
-            dateInput.datetimepicker({
-                //language:  'fr',
-                format:'yyyy/mm/dd hh:i:s',
-                weekStart: 1,
-                todayBtn:  1,
-                autoclose: 1,
-                todayHighlight: 1,
-                startView: 2,
-                forceParse: 0,
-                showMeridian: 1
-            });
-
-        });
-    }
+    //var dateInput = $("input.Y_date")
+    //if (dateInput.length) {
+    //    Yan.css('datetimepicker');
+    //    Yan.use('datetimepicker', 'datetimepickerzhcn',function () {
+    //        dateInput.datetimepicker({
+    //            //language:  'fr',
+    //            format:'yyyy/mm/dd hh:i:s',
+    //            weekStart: 1,
+    //            todayBtn:  1,
+    //            autoclose: 1,
+    //            todayHighlight: 1,
+    //            startView: 2,
+    //            forceParse: 0,
+    //            showMeridian: 1
+    //        });
+    //
+    //    });
+    //}
 
     //日期+时间选择器
     var dateTimeInput = $("input.J_datetime");
@@ -140,6 +140,24 @@
                     content: $('#' + item.data('rel')).val()
                 });
             }
+        });
+    }
+
+    //.全选反选
+    if($('.check-all').length)
+    {
+        $('.check-all').each(function(){
+            var that =this;
+            var $this = $(this);
+            var $item = $('.'+$this.data('item-class'));
+            $this.click(function(){
+                $item.attr("checked",that.checked);
+            })
+        });
+
+        $('.check-all').click(function(){
+            var $item = $('.'+$(this).data('item-class'));
+            $item.prop("checked",this.checked);
         });
     }
 

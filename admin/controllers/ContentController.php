@@ -1,6 +1,7 @@
 <?php
 namespace admin\controllers;
 
+use admin\models\CollectForm;
 use common\models\Collect;
 use common\models\Model;
 use common\models\Photos;
@@ -21,7 +22,9 @@ use common\helpers\File;
 use yii\helpers\Html;
 use common\helpers\Func;
 
-
+require Yii::getAlias('@webroot/') . 'common/libs/QueryList/vendor/autoload.php';
+use QL\QueryList;
+use phpQuery;
 
 class ContentController extends BackendController
 {
@@ -173,7 +176,7 @@ class ContentController extends BackendController
                     {
                         $uploadRoot = Bridge::getRootPath();
                         $savePath = 'uploads/content/';
-                        $saveName = md5(uniqid().rand(1,111111)).'.'.$model->file->getExtension();
+                        $saveName = uniqid().'.'.$model->file->getExtension();
                         $file = $uploadRoot.$savePath.$saveName;
 
                         if(!$model->file->saveAs($file))
@@ -497,6 +500,104 @@ class ContentController extends BackendController
             'content'=>$this->renderPartial('importForm',['catid'=>$catid]),
             'footer'=>Html::submitButton(Yii::t('app','Import'),['class'=>'btn btn-default']).Html::button(Yii::t('app','Close'),['class'=>'btn','data-dismiss'=>'modal'])
         ]);
+    }
+
+    //.采集数据
+    public function actionCollectData($catid)
+    {
+        $category = CategoryContent::findOne($catid);
+        $model = new CollectForm();
+        $params['category'] = $category;
+        $params['model'] = $model;
+        if($post = Yii::$app->request->post())
+        {
+            $model->load($post);
+            if($model->validate())
+            {
+                preg_match('/^(https?:\/\/)?([^\/]+)/i',$model->c_url,$match);
+                $host =  $match[1].$match[2];
+                $reg = [
+                    'title' => [$model->c_title, 'text'],
+                ];
+                if($model->c_thumb)
+                {
+                    $reg['thumb'] = [$model->c_thumb,'src'];
+                }
+                if($model->c_content)
+                {
+//                    $content = $model->c_content;
+//                    $item = explode('|',$content);
+//                    $contentSelector = $item[1];
+//                    $reg['content'] = [$item[0],'href','',function($result) use ($host,$contentSelector){
+//
+//                        $content_url = $host.'/'.$result;
+//                        $ql_content = QueryList::Query($content_url,[
+//                            'content'=>[$contentSelector,'html','']
+//                        ]);
+//                        $data_content = $ql_content->getData();
+//                        return $data_content[0]['content'];
+//                    }];
+                }
+                $ql = QueryList::Query($model->c_url, $reg, $model->c_block);
+                $data = $ql->getData();
+                if(isset($post['preview']))
+                {
+                    $params['data'] = $data;
+                }
+                else if(isset($post['collect']))
+                {
+                    $titles = Yii::$app->request->post('titles');
+                    $result = [];
+                    if($titles)
+                    {
+                        foreach($data as $v)
+                        {
+                            if(in_array($v['title'],$titles))
+                            {
+                                $contentModel = new Content();
+                                $contentModel->catid = $catid;
+                                $contentModel->title = $v['title'];
+                                if(isset($v['thumb']) && $v['thumb'])
+                                {
+                                    $ext = File::getExt($v['thumb']);
+                                    $content = file_get_contents($v['thumb']);
+                                    if($content)
+                                    {
+                                        $file = uniqid().'.'.$ext;
+                                        file_put_contents(Bridge::getRootPath().'uploads/content/'.$file,$content);
+                                        $contentModel->thumb = $file;
+                                    }
+                                }
+                                if(isset($v['description']) && $v['description'])
+                                {
+                                    $contentModel->description = $v['description'];
+                                }
+                                if(isset($v['click']) && $v['click'])
+                                {
+                                    $contentModel->click = $v['click'];
+                                }
+                                if(isset($v['time']) && $v['time'])
+                                {
+                                    $contentModel->created_at = strtotime($v['time']);
+                                    $contentModel->updated_at = strtotime($v['time']);
+                                }
+                                if($contentModel->save(false))
+                                {
+                                    $result[] = $v;
+                                }
+
+                            }
+
+                        }
+                    }
+                    $params['result'] = $result;
+                }
+
+
+
+            }
+        }
+        return $this->render('collect-data',$params);
     }
 
 

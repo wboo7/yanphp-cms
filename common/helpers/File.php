@@ -293,6 +293,14 @@ class File extends FileHelper{
         return $ret;
     }
 
+    public static function getExt($str)
+    {
+        $str = strtolower(trim($str));
+        $item = explode('.',$str);
+        return end($item);
+    }
+
+
 
 }
 ?>
