@@ -64,11 +64,11 @@ class PositionController extends BackendController
         {
             if($model->load($postData) && $model->save())
             {
-                $this->ajaxReturn('success',Yii::t('app','Operate Success'));
+                return $this->redirect(['lists']);
             }
             else
             {
-                $this->ajaxReturn('fail',Yii::t('app','Operate Fail'));
+                return $this->renderError($model);
             }
         }
         return $this->render('_form',['model'=>$model]);

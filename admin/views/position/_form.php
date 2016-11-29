@@ -7,12 +7,12 @@ use yii\helpers\Url;
 ?>
 <?= $this->render('Breadcrumb');?>
 <div class="panel panel-default">
-	<div class="panel-body">
-        <?php $form = ActiveForm::begin([ 'options' => ['class' => 'J_ajaxForm']]); ?>
+    <div class="panel-body">
+        <?php $form = ActiveForm::begin(); ?>
         <?=$form->field($model,'name')?>
-        <?=Html::button(Yii::t('app','Commit'),['class'=>'btn btn-default J_ajax_submit_btn'])?>
+        <?=Html::submitButton(Yii::t('app','Commit'),['class'=>'btn btn-default'])?>
         <?php ActiveForm::end(); ?>
-	</div>
+    </div>
 </div>
 
 
